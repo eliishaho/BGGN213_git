@@ -1,0 +1,243 @@
+---
+title: "class09"
+author: "Elisha"
+date: "4/26/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## kmeans clustering
+Try the kmeans()
+
+```{r}
+tmp <- c(rnorm(30,-3), rnorm(30,3)) 
+x <- cbind(x=tmp, y=rev(tmp))
+
+plot(x)
+```
+
+```{r}
+z <- kmeans(x, centers = 2, nstart=20)
+z
+```
+```{r}
+z$size
+z$cluster
+z$center
+```
+
+
+Use the kmeans() function setting k to 2 and nstart=20 
+Inspect/print the results
+>Q. How many points are in each cluster?  30/30
+
+```{r}
+z$size
+```
+
+>Q. What ‘component’ of your result object details - cluster size?
+- cluster assignment/membership? - cluster center?
+
+```{r}
+z$size
+table(z$cluster)
+z$center
+```
+
+
+Plot x colored by the kmeans cluster assignment and add cluster centers as blue points
+
+```{r}
+plot(x, col=z$cluster) 
+points(z$center, col= "Blue", pch =3, cex= 3)
+```
+
+
+# Hierarchical Clustering
+Here we dont have to spell out K the number of clusters before hand but we do have to give it a distance matrix as input.
+```{r}
+d <-dist(x)
+hc <- hclust(d)
+hc            
+```
+
+
+
+Plot the results
+```{r}
+plot(hc)
+abline(h = 6, col = "red")
+cutree(hc, h=6)
+```
+
+```{r}
+gp2 <- cutree(hc, k=2)
+gp2
+```
+
+```{r}
+gp3 <- cutree(hc, k=3)
+gp3
+```
+```{r}
+table (gp3)
+table(gp2)
+table(gp2, gp3)
+```
+
+# Try a more real-life like example to see how clusering works
+```{r}
+x <- rbind(
+matrix(rnorm(100, mean=0, sd = 0.3), ncol = 2), 
+# c1
+matrix(rnorm(100, mean = 1, sd = 0.3), ncol = 2), # c2 
+matrix(c(rnorm(50, mean = 1, sd = 0.3), # c3 
+         rnorm(50, mean = 0, sd = 0.3)), ncol = 2)) 
+colnames(x) <- c("x", "y")
+
+```
+```{r}
+plot(x)
+```
+```{r}
+col <- as.factor( rep(c("c1","c2","c3"), each=50) )
+plot(x, col=col)
+```
+>Q Use the dist(), hclust(), plot() and cutree() functions to return 2 and 3 clusters
+dist(x,)
+>Q. How does this compare to your known 'col' groups
+
+```{r}
+hc1 <- hclust(dist(x))
+
+plot(hc)
+```
+
+
+```{r}
+gx2 <-  cutree(hc1, 2)
+gx3 <- cutree(hc1,3)
+
+table(gx2)
+table(gx3)
+table(gx2,gx3)
+```
+
+
+```{r}
+plot(x, col=col)
+
+```
+
+
+
+##second section : PCA
+
+```{r}
+mydata <- read.csv("https://tinyurl.com/expression-CSV", row.names=1)
+head(mydata)
+```
+
+We will use the base R **prcomp()** function for PCA today...
+Get some RNAseq data data to play with
+There are `r nrow(mydata)` in this dataset ( will insert the number into the output/knit)
+(the upleft key)
+
+```{r}
+# t: transpose
+head(t(mydata))
+# scale will treat each col equally, need the data in row as input, col as variables
+pca <- prcomp(t(mydata), scale = T)
+summary(pca)
+```
+
+```{r}
+attributes(pca)
+```
+
+Let make out first PCA plot
+```{r}
+plot(pca$x[,1], pca$x[,2])
+```
+
+```{r}
+pca.var <- pca$sdev^2
+pca.var.per <- round(pca.var/sum(pca.var)*100, 1)
+pca.var
+```
+
+```{r}
+xlab = paste("PC1 (", pca.var.per[1], "%)", sep="")
+ylab= paste("PC2 (", pca.var.per[2], "%)", sep="")
+plot(pca$x[,1], pca$x[,2], xlab = xlab, ylab=ylab)
+```
+
+```{r}
+identify(pca$x[,1], pca$x[,2], colnames(mydata))
+```
+
+
+#hands on project
+```{r}
+x <- read.csv("../UK_foods.csv")
+```
+Q1. How many rows and columns are in your new data frame named x? What R functions could you use to answer this questions?
+```{r}
+nrow(x)
+ncol(x)
+dim(x)
+```
+
+```{r}
+head(x, 6)
+```
+
+Fixing the row name
+```{r}
+rownames(x) <- x[,1]
+head(x)
+x <- x[,-1]
+head(x)
+```
+
+```{r}
+x <- read.csv("../UK_foods.csv", row.names=1)
+head(x)
+```
+
+```{r}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+
+```{r}
+pairs(x, col=rainbow(10), pch=16)
+```
+```{r}
+# Use the prcomp() PCA function 
+pca <- prcomp( t(x) )
+summary(pca)
+```
+```{r}
+# Plot PC1 vs PC2
+mycols <-c("orange", "red", " blue", "darkgreen")
+plot(pca$x[,1], pca$x[,2], xlab="PC1", ylab="PC2", xlim=c(-270,500))
+text(pca$x[,1], pca$x[,2], colnames(x), col=mycols)
+```
+
+
+```{r}
+v <- round( pca$sdev^2/sum(pca$sdev^2) * 100 )
+v
+z <- summary(pca)
+z$importance
+barplot(v, xlab="Principal Component", ylab="Percent Variation")
+```
+
+```{r}
+par(mar=c(10, 3, 0.35, 0))
+barplot( pca$rotation[,1], las=2 )
+```
+

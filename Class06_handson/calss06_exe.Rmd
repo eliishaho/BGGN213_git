@@ -1,0 +1,78 @@
+---
+title: "Class06_exercise"
+author: "Elisha"
+date: "4/19/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+#Pull Secdonary structure info of desired protein from PDB
+struc <-  function(x){
+  library(bio3d)
+  y <- read.pdb(x)
+  y.chainA <- trim.pdb(y, chain="A", elety="CA")
+  y.b <- y.chainA$atom$b
+  return(y.b)
+  plotb3(y.b, sse=y.chainA, typ="l", ylab="Bfactor") 
+}
+```
+
+
+```{r}
+# plot known structures together for comparison
+ComStru <- function(a,b,c){
+  a1 <- struc(a)
+  b1 <- struc(b)
+  c1 <- struc(c)
+  hc <- hclust( dist( rbind(a1, b1, c1) ) )
+plot(hc)
+}
+```
+
+```{r}
+struc("1E4Y")
+struc("1AKE")
+```
+
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA") 
+
+```{r}
+struc("1AKE")
+  # x.b <-  x.chainA$atom$b
+#  plotb3(x.b, sse= x.chainA, typ="l", ylab="Bfactor")
+#}
+```
+```{r}
+hc <- hclust( dist( rbind(s1.b, s2.b, s3.b) ) )
+plot(hc)
+```
+
+#Pull everything together to become one code
+
+```{r}
+# plot clusters based on structures of interested 3 proteins
+# Output a1, b1,c1 will correspond to the order of the input 
+ComStru <- function(a,b,c){
+  a1 <- struc(a)
+  b1 <- struc(b)
+  c1 <- struc(c)
+  hc <- hclust( dist( rbind(a1, b1, c1) ) )
+plot(hc)
+}
+
+#Pull structure info of desired protein from PDB
+struc <-  function(x){
+  library(bio3d)
+  y <- read.pdb(x)
+  y.chainA <- trim.pdb(y, chain="A", elety="CA")
+  y.b <- y.chainA$atom$b
+  return(y.b)
+  plotb3(y.b, sse=y.chainA, typ="l", ylab="Bfactor") 
+}
+```
+

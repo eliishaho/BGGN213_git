@@ -1,0 +1,41 @@
+---
+title: "HW_class06_Q6"
+author: "Elisha"
+date: "4/26/2019"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Homework
+```{r}
+# plot clusters based on structures of interested 3 proteins
+# Output a1, b1,c1 will correspond to the order of the input 
+ComStru <- function(a,b,c){
+  a1 <- struc(a)
+  b1 <- struc(b)
+  c1 <- struc(c)
+  hc <- hclust( dist( rbind(a1, b1, c1) ) )
+plot(hc)
+}
+
+#Pull structure info of desired protein from PDB
+struc <-  function(x){
+  library(bio3d)
+  y <- read.pdb(x)
+  y.chainA <- trim.pdb(y, chain="A", elety="CA")
+  y.b <- y.chainA$atom$b
+  return(y.b)
+  plotb3(y.b, sse=y.chainA, typ="l", ylab="Bfactor") 
+}
+```
+
+## Testing functions
+```{r}
+ComStru("1AKE","4AKE","1E4Y")
+```
+
